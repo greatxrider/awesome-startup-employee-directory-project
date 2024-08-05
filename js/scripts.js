@@ -7,8 +7,9 @@ const paginationHTML =
     `<div class="pagination">
             <ul class="link-list"></ul>
         </div>`;
-modalContainer.insertAdjacentHTML('afterend', paginationHTML);
+gallery.insertAdjacentHTML('afterend', paginationHTML);
 const usersPerPage = 12;
+let currentIndex = 0;
 let users = [];
 
 const fetchData = async (url) => {
@@ -78,19 +79,19 @@ const displayUsers = (list, page) => {
     const startIndex = (page * usersPerPage) - usersPerPage;
     const endIndex = (page * usersPerPage) - 1;
     gallery.innerHTML = '';
-
+    console.log(list);
     for (let i = 0; i < list.length; i++) {
         if (i >= startIndex && i <= endIndex) {
             const userHTML = `<div class="card">
-                            <div class="card-img-container">
-                                <img class="card-img" src="${list[i].picture.large}" alt="profile picture">
-                            </div>
-                            <div class="card-info-container">
-                                <h3 id="name" class="card-name cap">${list[i].name.first} ${list[i].name.last}</h3>
-                                <p class="card-text">${list[i].email}</p>
-                                <p class="card-text cap">${list[i].location.city}, ${list[i].location.state}</p>
-                            </div>
-                        </div>`;
+                                    <div class="card-img-container">
+                                        <img class="card-img" src="${list[i].picture.large}" alt="profile picture">
+                                    </div>
+                                    <div class="card-info-container">
+                                        <h3 id="name" class="card-name cap">${list[i].name.first} ${list[i].name.last}</h3>
+                                        <p class="card-text">${list[i].email}</p>
+                                        <p class="card-text cap">${list[i].location.city}, ${list[i].location.state}</p>
+                                    </div>
+                                </div>`;
             gallery.insertAdjacentHTML('beforeend', userHTML);
         }
     }
@@ -106,62 +107,75 @@ const parseDate = (dateString) => {
     return formattedDate;
 }
 
-gallery.addEventListener('click', (event) => {
-    const clickedCard = event.target.closest('.card');
-
-    if (clickedCard) {
-        const clickedUserName = clickedCard.querySelector('.card-name').textContent;
-        const foundUser = users.find((user) => {
-            let fullName = `${user.name.first} ${user.name.last}`;
-            return fullName === clickedUserName;
-        });
-        const modalHTML =
-            `<div class="modal">
+const showModal = (list) => {
+    const modalHTML =
+        `<div class="modal">
                 <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
                 <div class="modal-info-container">
-                    <img class="modal-img" src="${foundUser.picture.large}" alt="profile picture">
-                    <h3 id="name" class="modal-name cap">${foundUser.name.first} ${foundUser.name.last}</h3>
-                    <p class="modal-text">${foundUser.email}</p>
-                    <p class="modal-text cap">${foundUser.location.city}</p>
+                    <img class="modal-img" src="${list.picture.large}" alt="profile picture">
+                    <h3 id="name" class="modal-name cap">${list.name.first} ${list.name.last}</h3>
+                    <p class="modal-text">${list.email}</p>
+                    <p class="modal-text cap">${list.location.city}</p>
                     <hr>
-                    <p class="modal-text">${foundUser.phone}</p>
-                    <p class="modal-text">${foundUser.location.street.number} ${foundUser.location.street.name}, ${foundUser.location.city}, ${foundUser.location.state} ${foundUser.location.postcode}</p>
-                    <p class="modal-text">Birthday: ${parseDate(foundUser.dob.date)}</p>
+                    <p class="modal-text">${list.phone}</p>
+                    <p class="modal-text">${list.location.street.number} ${list.location.street.name}, ${list.location.city}, ${list.location.state} ${list.location.postcode}</p>
+                    <p class="modal-text">Birthday: ${parseDate(list.dob.date)}</p>
                 </div>
                 <div class="modal-btn-container">
                     <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
                     <button type="button" id="modal-next" class="modal-next btn">Next</button>
                 </div>
             </div>`;
-        modalContainer.innerHTML = modalHTML;
-        modalContainer.classList.add('open');
+    modalContainer.innerHTML = modalHTML;
+    modalContainer.classList.add('open');
+};
 
-        const closeButton = modalContainer.querySelector('.modal-close-btn');
-        const prevButton = modalContainer.querySelector('#modal-prev');
-        const nextButton = modalContainer.querySelector('#modal-next');
+const getUserIndex = (name) => {
+    console.log(users);
+    modalContainer.innerHTML = '';
+    const index = users.findIndex(user => {
+        let fullName = `${user.name.first} ${user.name.last}`;
+        return fullName === name;
+    })
+    return index;
+}
 
-        closeButton.addEventListener('click', () => modalContainer.classList.remove('open'));
+const findUser = (name, list) => {
+    const foundUser = list.find((user) => {
+        let fullName = `${user.name.first} ${user.name.last}`;
+        return fullName === name;
+    });
+    return foundUser;
+}
 
-        modalContainer.addEventListener('click', (event) => {
-            if (event.target === modalContainer) {
-                modalContainer.classList.remove('open');
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                modalContainer.classList.remove('open');
-            }
-        });
-
-        prevButton.addEventListener('click', () => {
-
-        });
-
-        nextButton.addEventListener('click', () => {
-
-        });
+gallery.addEventListener('click', (event) => {
+    const clickedCard = event.target.closest('.card');
+    if (clickedCard) {
+        const clickedUserName = clickedCard.querySelector('.card-name').textContent;
+        currentIndex = getUserIndex(clickedUserName);
+        modalContainer.innerHTML = '';
+        showModal(findUser(clickedUserName, users));
     };
+});
+
+modalContainer.addEventListener('click', (event) => {
+    const target = event.target;
+
+    if (target.id === 'modal-close-btn' || target.closest('#modal-close-btn')) {
+        modalContainer.classList.remove('open')
+    } else if (target.id === 'modal-prev' || target.closest('#modal-prev')) {
+        if ()
+    } else if (target.id === 'modal-next' || target.closest('#modal-next')) {
+
+    } else if (target === modalContainer) {
+        modalContainer.classList.remove('open');
+    }
+})
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        modalContainer.classList.remove('open');
+    }
 });
 
 displayLoading();
