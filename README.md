@@ -18,10 +18,12 @@ This project emphasizes a deep understanding of how web tools work "under the ho
 - [License](#license)
 
 ## Features
-- Displaying a list of 12 employees with pagination controls.
+- Displaying a list of 58 employees with pagination controls.
 - Dynamically updating the employee list based on search input.
 - Responsive pagination based on search results.
 - Modal window with detailed employee information.
+- Modal Navigation: Added navigation functionality within the modal to toggle between employees.
+- Added pagination functionality to move to another page of employees.
 
 ## Installation
 1. Clone the repository:
@@ -59,7 +61,11 @@ project-root/
 • This project emphasizes dynamic rendering of content using JavaScript.
 • Contributions and feedback are welcome via GitHub pull requests.
 • The project includes additional steps for preparing, building, and testing.
-
+• The following style changes were made:
+    - Background Color: The background color of the modal was changed to sky blue to improve the visual appeal.
+    - Font Types: Custom fonts were used to enhance readability and aesthetics.
+    - Title and Headers Position: The position of the title and headers was adjusted for better alignment and visual hierarchy.
+    
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

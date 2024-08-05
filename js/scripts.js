@@ -8,9 +8,11 @@ const paginationHTML =
             <ul class="link-list"></ul>
         </div>`;
 gallery.insertAdjacentHTML('afterend', paginationHTML);
+const paginationList = document.querySelector('.link-list');
 const usersPerPage = 12;
 let currentIndex = 0;
 let users = [];
+let filteredList = [];
 
 const fetchData = async (url) => {
     try {
@@ -24,7 +26,7 @@ const fetchData = async (url) => {
 };
 
 const getUsers = async () => {
-    const url = 'https://randomuser.me/api/?results=58';
+    const url = 'https://randomuser.me/api/?results=58&nat=au,ca,gb,ie,nz,us';
     const usersData = await fetchData(url);
     return usersData;
 };
@@ -43,7 +45,6 @@ const displaySearchBar = () => {
 }
 
 const addPagination = (list) => {
-    const paginationList = document.querySelector('.link-list');
     const numberOfButtons = Math.ceil(list.length / usersPerPage);
     paginationList.innerHTML = '';
 
@@ -79,7 +80,6 @@ const displayUsers = (list, page) => {
     const startIndex = (page * usersPerPage) - usersPerPage;
     const endIndex = (page * usersPerPage) - 1;
     gallery.innerHTML = '';
-    console.log(list);
     for (let i = 0; i < list.length; i++) {
         if (i >= startIndex && i <= endIndex) {
             const userHTML = `<div class="card">
@@ -131,9 +131,12 @@ const showModal = (list) => {
 };
 
 const getUserIndex = (name) => {
-    console.log(users);
+    if (filteredList.length === 0) {
+        filteredList = users;
+    }
+
     modalContainer.innerHTML = '';
-    const index = users.findIndex(user => {
+    const index = filteredList.findIndex(user => {
         let fullName = `${user.name.first} ${user.name.last}`;
         return fullName === name;
     })
@@ -155,27 +158,70 @@ gallery.addEventListener('click', (event) => {
         currentIndex = getUserIndex(clickedUserName);
         modalContainer.innerHTML = '';
         showModal(findUser(clickedUserName, users));
-    };
+    }
 });
 
 modalContainer.addEventListener('click', (event) => {
+    if (filteredList.length === 0) {
+        filteredList = users;
+    }
+
     const target = event.target;
-
     if (target.id === 'modal-close-btn' || target.closest('#modal-close-btn')) {
-        modalContainer.classList.remove('open')
+        modalContainer.classList.remove('open');
     } else if (target.id === 'modal-prev' || target.closest('#modal-prev')) {
-        if ()
+        if (currentIndex > 0) {
+            currentIndex--;
+            showModal(filteredList[currentIndex]);
+        }
     } else if (target.id === 'modal-next' || target.closest('#modal-next')) {
-
+        if (currentIndex < filteredList.length - 1) {
+            currentIndex++;
+            showModal(filteredList[currentIndex]);
+        }
     } else if (target === modalContainer) {
         modalContainer.classList.remove('open');
     }
-})
+});
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
         modalContainer.classList.remove('open');
     }
+});
+
+searchContainer.addEventListener('click', (event) => {
+    const target = event.target;
+    const searchInput = document.getElementById('search-input');
+    filteredList = [];
+    if (target.id === 'search-submit') {
+        const userInput = searchInput.value.toLowerCase();
+
+        for (let i = 0; i < users.length; i++) {
+            const studentName = `${users[i].name.first} ${users[i].name.last}`.toLowerCase();
+
+            if (studentName.includes(userInput)) {
+                filteredList.push(users[i]);
+            }
+
+            if (filteredList.length > 0) {
+                addPagination(filteredList);
+                displayUsers(filteredList, 1);
+            } else {
+                const noResultsFoundHtml = `<h3>No results found</h3>`
+                gallery.innerHTML = noResultsFoundHtml;
+            }
+        }
+        paginationList.style.display = filteredList.length === 0 ? 'none' : '';
+    }
+
+    searchInput.addEventListener('input', (e) => {
+        if (searchInput.value === '') {
+            addPagination(users);
+            displayUsers(users, 1);
+            paginationList.style.display = '';
+        }
+    })
 });
 
 displayLoading();
